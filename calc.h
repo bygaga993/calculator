@@ -1,72 +1,49 @@
-#include<vector>
+#include<map>
 #include<memory>
 
 class Operation{
     public:
-        virtual float change_value(float&) const = 0;
-        virtual ~Operation() {};
+        virtual float change_value(float left, float right) const = 0;
+        virtual ~Operation() = default;
 };
 
 class Add: public Operation{
-    private:
-        float number;
     public:
-        Add(float n): number(n) {};
-        float change_value(float&) const override;
+        float change_value(float left, float right) const override;
 };
 
 class Sub: public Operation{
-    private:
-        float number;
     public:
-        Sub(float n): number(n) {};
-        float change_value(float&) const override;
+        float change_value(float left, float right) const override;
 };
 
 
 class Mul: public Operation{
-    private:
-        float number;
     public:
-        Mul(float n): number(n) {};
-        float change_value(float&) const override;
+        float change_value(float left, float right) const override;
 };
 
 class Div: public Operation{
-    private:
-        float number;
     public:
-        Div(float n): number(n) {};
-        float change_value(float&) const override;
+        float change_value(float left, float right) const override;
 };
 
 class Pow: public Operation{
-    private:
-        float number;
     public:
-        Pow(float n): number(n) {};
-        float change_value(float&) const override;
+        float change_value(float left, float right) const override;
 };
 
-class SquareRoot: public Operation{
-    public:
-        float change_value(float&) const override;
-};
-
-class Square: public Operation{
-    public:
-        float change_value(float&) const override;
-};
 
 
 class Calculator{
     private:
         float start_value;
-        std::vector<std::unique_ptr<Operation>> operations;
+        std::map<std::string, std::unique_ptr<Operation>> registry;
     
     public:
         Calculator() : start_value(0.0) {};
         Calculator(float number) : start_value(number) {};
-        void add_operation(std::unique_ptr<Operation>);
-        float return_result();
+        template <class T>
+        Calculator& RegisterOperation(std::string name) noexcept;
+        const std::unique_ptr<Operation>& GetOperationByName(std::string name) const;
 };

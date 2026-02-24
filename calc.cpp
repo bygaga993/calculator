@@ -1,42 +1,38 @@
 #include "calc.h"
 #include<cmath>
 
-float Add::change_value(float& res_value) const{
-    return number + res_value;
+float Add::change_value(float left, float right) const{
+    return left + right;
 }
 
-float Sub::change_value(float& res_value) const{
-    return res_value - number;
+float Sub::change_value(float left, float right) const{
+    return left - right;
 }
 
-float Mul::change_value(float& res_value) const{
-    return res_value * number;
+float Mul::change_value(float left, float right) const{
+    return left * right;
 }
 
-float Div::change_value(float& res_value) const{
-    return res_value / number;
+float Div::change_value(float left, float right) const{
+    return left / right;
 }
 
-float Pow::change_value(float& res_value) const{
-    return pow(res_value, number);
-}
-
-float SquareRoot::change_value(float& res_value) const{
-    return sqrt(res_value);
-}
-
-float Square::change_value(float& res_value) const{
-    return pow(res_value, 2);
+float Pow::change_value(float left, float right) const{
+    return pow(left, right);
 }
 
 
-void Calculator::add_operation(std::unique_ptr<Operation> op){
-    operations.push_back(std::move(op));
+template <class T>
+Calculator& Calculator::RegisterOperation(std::string name) noexcept {
+            registry.emplace(std::move(name), std::make_unique<T>());
+            return *this;
 }
 
-float Calculator::return_result(){
-    for (auto& ptr: operations){
-        start_value = ptr->change_value(start_value);
-    }
-    return start_value;
+const std::unique_ptr<Operation>& Calculator::GetOperationByName(std::string name) const {
+    auto it = registry.find(name);  
+    
+    if (it == registry.end())  
+        throw std::runtime_error("no such operation: " + name);
+    
+    return it->second;  
 }
