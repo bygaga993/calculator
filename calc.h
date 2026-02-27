@@ -43,8 +43,8 @@ class Calculator{
     public:
         Calculator() : start_value(0.0) {};
         Calculator(float number) : start_value(number) {};
-        template <class T>
-        Calculator& Calculator::RegisterOperation(std::string name) noexcept {
+        template <class T> 
+        Calculator& RegisterOperation(std::string name) noexcept {
             registry.emplace(std::move(name), std::make_unique<T>());
             return *this;
         }
