@@ -1,3 +1,5 @@
+#pragma once
+
 #include<string>
 #include<vector>
 #include<memory>
@@ -14,6 +16,8 @@ enum OperationType {
 class Expr {
     public:
         virtual ~Expr() = default;
+        virtual bool IsNumber() const = 0;
+        virtual void Print() const = 0;
 };
 
 class NumberExpr: public Expr {
@@ -22,19 +26,28 @@ class NumberExpr: public Expr {
     public:
         NumberExpr(float v): value(v) {};
         float getNumber() const;
+        bool IsNumber() const;
+        void Print() const;
 };
 
 class OperatorExpr: public Expr {
     private:
         OperationType type; 
     public:
+        bool operator<(const OperatorExpr& other) const {
+            return type < other.type;
+        }
+        
         OperatorExpr(OperationType t): type(t) {};
         OperationType getType() const;
+        bool IsNumber() const;
+        void Print() const;
 };
 
-class Parser {
-    private:
-        std::vector<std::unique_ptr<Expr>> tokens;
+class Tokenizer{
+    private: 
+        std::string expression;
     public:
-        std::vector<std::unique_ptr<Expr>> parse(std::string);  
+        Tokenizer(std::string s):  expression(s) {};
+        std::vector<std::unique_ptr<Expr>> ToExprTokens() const;
 };
