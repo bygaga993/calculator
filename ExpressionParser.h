@@ -9,7 +9,7 @@
 class ExpressionParser {
     private:
         std::vector<std::unique_ptr<Expr>> tokens;
-        const std::map<OperatorExpr, std::unique_ptr<Operation>>& operators_;
+        const std::map<OperationType, std::unique_ptr<Operation>>& operators_;
     public:
         ExpressionParser(const Calculator& calc) : operators_(calc.GetOperatorsMap()){};
         void Parse(std::string);

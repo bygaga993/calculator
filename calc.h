@@ -3,7 +3,16 @@
 
 #include<map>
 #include<memory>
-#include "Expression.h"
+
+
+enum OperationType {
+    Plus,
+    Minus,
+    Mul,
+    Div, 
+    LParen,
+    RParen
+};
 
 class Operation{
     public:
@@ -37,15 +46,15 @@ class DivOperation: public Operation{
 
 class Calculator{
     private:
-        std::map<OperatorExpr, std::unique_ptr<Operation>> registry;
+        std::map<OperationType, std::unique_ptr<Operation>> registry;
     
     public:
         Calculator() {};
         template <class T> 
-        Calculator& RegisterOperation(OperatorExpr name) noexcept {
+        Calculator& RegisterOperation(OperationType name) noexcept {
             registry.emplace(std::move(name), std::make_unique<T>());
             return *this;
         }
-        const std::unique_ptr<Operation>& GetOperationByName(OperatorExpr name) const;
-        const std::map<OperatorExpr, std::unique_ptr<Operation>>& GetOperatorsMap() const;
+        const std::unique_ptr<Operation>& GetOperationByName(OperationType name) const;
+        const std::map<OperationType, std::unique_ptr<Operation>>& GetOperatorsMap() const;
 };

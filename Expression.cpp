@@ -44,10 +44,6 @@ float OperatorExpr::AsNumber() const{
 }
 
 
-OperationType NumberExpr::AsOperation() const{
-    throw std::runtime_error("it is Number Expr");
-}
-
-OperationType OperatorExpr::AsOperation() const{
-    return type;
+float OperatorExpr::change_value(float left, float right){
+    return op->change_value(left, right);
 }

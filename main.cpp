@@ -9,10 +9,10 @@
 
 int main() {
     Calculator calc;
-    calc.RegisterOperation<AddOperation>(OperatorExpr(Plus)).
-        RegisterOperation<SubOperation>(OperatorExpr(Minus)).
-        RegisterOperation<DivOperation>(OperatorExpr(Div)).
-        RegisterOperation<MulOperation>(OperatorExpr(Mul));
+    calc.RegisterOperation<AddOperation>(Plus).
+        RegisterOperation<SubOperation>(Minus).
+        RegisterOperation<DivOperation>(Div).
+        RegisterOperation<MulOperation>(Mul);
 
 
     std::cout << "Введите выражение \n";
@@ -31,12 +31,11 @@ int main() {
             resultStack.push(token->AsNumber());
         } else {
             float result;
-            OperationType opType  = token->AsOperation();
             auto right = resultStack.top(); 
             resultStack.pop();
             auto left = resultStack.top();  
             resultStack.pop();
-            result = calc.GetOperationByName(opType)->change_value(left, right);
+            result = token->change_value(left, right);
             resultStack.push(result);
         }
     }

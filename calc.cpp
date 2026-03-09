@@ -18,7 +18,7 @@ float DivOperation::change_value(float left, float right) const{
 }
 
 
-const std::unique_ptr<Operation>& Calculator::GetOperationByName(OperatorExpr name) const{
+const std::unique_ptr<Operation>& Calculator::GetOperationByName(OperationType name) const{
     auto it = registry.find(name);
     if (it == registry.end()) {
         throw std::runtime_error("no such operation");
@@ -26,6 +26,6 @@ const std::unique_ptr<Operation>& Calculator::GetOperationByName(OperatorExpr na
     return it->second;
 }
 
-const std::map<OperatorExpr, std::unique_ptr<Operation>>& Calculator::GetOperatorsMap() const{
+const std::map<OperationType, std::unique_ptr<Operation>>& Calculator::GetOperatorsMap() const{
     return registry;
 }

@@ -4,7 +4,6 @@
 #include <memory>
 #include <stdexcept>
 #include <iostream>
-#include "tokenizer.h"
 #include "ExpressionParser.h"
 
 
@@ -76,8 +75,8 @@ void ExpressionParser::ToPostfix()
     std::vector<std::unique_ptr<Expr>> postfixExpr;
     std::stack<std::unique_ptr<Expr>> opStack;
 
-    auto getPrecedence = [](OperationType op) -> int {
-        switch (op) {
+    auto getPrecedence = [](OperatorExpr* op) -> int {
+        switch (op->getType()) {
             case Mul: case Div: return 2;
             case Plus: case Minus: return 1;
             case LParen: case RParen: return 0;
@@ -93,19 +92,20 @@ void ExpressionParser::ToPostfix()
         } 
         else 
         {
-            auto op = token->AsOperation();
+            auto* op = dynamic_cast<OperatorExpr*>(token.get());
+            OperationType opType = op->getType();
             
-            if (op == LParen)
+            if (opType == LParen)
             {
                 opStack.push(std::move(token));
             } 
-            else if (op == RParen) 
+            else if (opType == RParen) 
             {
                 while (!opStack.empty()) 
                 {
-                    auto opTop = opStack.top()->AsOperation();
+                    auto* opTop = dynamic_cast<OperatorExpr*>(opStack.top().get());
                     
-                    if (opTop == LParen)
+                    if (opTop->getType() == LParen)
                     {
                         opStack.pop();
                         break;
@@ -119,9 +119,9 @@ void ExpressionParser::ToPostfix()
             {
                 while (!opStack.empty()) 
                 {
-                    auto opTop = opStack.top()->AsOperation();
+                    auto* opTop = dynamic_cast<OperatorExpr*>(opStack.top().get());
                     
-                    if (opTop == LParen) {
+                    if (opTop->getType() == LParen) {
                         break;
                     }
                     
