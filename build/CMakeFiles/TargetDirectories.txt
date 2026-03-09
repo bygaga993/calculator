@@ -1,3 +1,0 @@
-/Users/kseniamaksimenko/C++/calc/build/CMakeFiles/calc.dir
-/Users/kseniamaksimenko/C++/calc/build/CMakeFiles/edit_cache.dir
-/Users/kseniamaksimenko/C++/calc/build/CMakeFiles/rebuild_cache.dir

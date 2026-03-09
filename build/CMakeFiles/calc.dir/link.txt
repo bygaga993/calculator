@@ -1,1 +1,0 @@
-/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/calc.dir/calc.cpp.o CMakeFiles/calc.dir/ExpressionParser.cpp.o CMakeFiles/calc.dir/main.cpp.o CMakeFiles/calc.dir/tokenizer.cpp.o -o calc

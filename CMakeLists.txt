@@ -9,7 +9,7 @@ set(SOURCES
     calc.cpp
     ExpressionParser.cpp
     main.cpp
-    tokenizer.cpp
+    Expression.cpp
     # Добавьте другие .cpp файлы если есть
 )
 
