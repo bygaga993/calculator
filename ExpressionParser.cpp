@@ -76,8 +76,8 @@ void ExpressionParser::ToPostfix()
     std::vector<std::unique_ptr<Expr>> postfixExpr;
     std::stack<std::unique_ptr<Expr>> opStack;
 
-    auto getPrecedence = [](OperatorExpr* op) -> int {
-        switch (op->getType()) {
+    auto getPrecedence = [](OperationType op) -> int {
+        switch (op) {
             case Mul: case Div: return 2;
             case Plus: case Minus: return 1;
             case LParen: case RParen: return 0;
@@ -93,20 +93,19 @@ void ExpressionParser::ToPostfix()
         } 
         else 
         {
-            auto* op = dynamic_cast<OperatorExpr*>(token.get());
-            OperationType opType = op->getType();
+            auto op = token->AsOperation();
             
-            if (opType == LParen)
+            if (op == LParen)
             {
                 opStack.push(std::move(token));
             } 
-            else if (opType == RParen) 
+            else if (op == RParen) 
             {
                 while (!opStack.empty()) 
                 {
-                    auto* opTop = dynamic_cast<OperatorExpr*>(opStack.top().get());
+                    auto opTop = opStack.top()->AsOperation();
                     
-                    if (opTop->getType() == LParen)
+                    if (opTop == LParen)
                     {
                         opStack.pop();
                         break;
@@ -120,9 +119,9 @@ void ExpressionParser::ToPostfix()
             {
                 while (!opStack.empty()) 
                 {
-                    auto* opTop = dynamic_cast<OperatorExpr*>(opStack.top().get());
+                    auto opTop = opStack.top()->AsOperation();
                     
-                    if (opTop->getType() == LParen) {
+                    if (opTop == LParen) {
                         break;
                     }
                     
