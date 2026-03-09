@@ -8,6 +8,69 @@
 #include "ExpressionParser.h"
 
 
+bool ExpressionParser::ContainsOperation(OperationType type) const{
+    auto it = operators_.find(type);
+    if (it != operators_.end()){
+        return true;
+    }
+    return false;
+}
+
+
+void ExpressionParser::Parse(std::string expression){
+
+    for (size_t i = 0; i < expression.size(); ) {  
+
+        if (std::isspace(expression[i])) {
+            i++;
+            continue;
+        }
+
+        if (std::isdigit(expression[i]) || expression[i] == '.') {
+            std::string number;
+
+            while (i < expression.size() &&
+                  (std::isdigit(expression[i]) || expression[i] == '.')) {
+                number += expression[i];
+                i++;
+            }
+
+            float value = std::stof(number);
+            tokens.push_back(std::make_unique<NumberExpr>(value));
+        }
+        else if (expression[i] == '+' && ContainsOperation(Plus)) {
+            tokens.push_back(std::make_unique<OperatorExpr>(Plus));
+            i++;
+        }
+        else if (expression[i] == '-' && ContainsOperation(Minus)) {
+            tokens.push_back(std::make_unique<OperatorExpr>(Minus));
+            i++;
+        }
+        else if (expression[i] == '*' && ContainsOperation(Mul)) {
+            tokens.push_back(std::make_unique<OperatorExpr>(Mul));
+            i++;
+        }
+        else if (expression[i] == '/' && ContainsOperation(Div)) {
+            tokens.push_back(std::make_unique<OperatorExpr>(Div));
+            i++;
+        }
+        else if (expression[i] == '(') {
+            tokens.push_back(std::make_unique<OperatorExpr>(LParen));
+            i++;
+        }
+        else if (expression[i] == ')') {
+            tokens.push_back(std::make_unique<OperatorExpr>(RParen));
+            i++;
+        }
+        else if (expression[i] == '=') {
+            break;
+        }
+        else {
+            throw std::runtime_error("Unknown character");
+        }
+    }
+}
+
 void ExpressionParser::ToPostfix()
 {
     std::vector<std::unique_ptr<Expr>> postfixExpr;

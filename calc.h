@@ -3,7 +3,7 @@
 
 #include<map>
 #include<memory>
-#include "tokenizer.h"
+#include "Expression.h"
 
 class Operation{
     public:
@@ -37,16 +37,15 @@ class DivOperation: public Operation{
 
 class Calculator{
     private:
-        float start_value;
         std::map<OperatorExpr, std::unique_ptr<Operation>> registry;
     
     public:
-        Calculator() : start_value(0.0) {};
-        Calculator(float number) : start_value(number) {};
+        Calculator() {};
         template <class T> 
         Calculator& RegisterOperation(OperatorExpr name) noexcept {
             registry.emplace(std::move(name), std::make_unique<T>());
             return *this;
         }
         const std::unique_ptr<Operation>& GetOperationByName(OperatorExpr name) const;
+        const std::map<OperatorExpr, std::unique_ptr<Operation>>& GetOperatorsMap() const;
 };

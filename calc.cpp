@@ -25,3 +25,7 @@ const std::unique_ptr<Operation>& Calculator::GetOperationByName(OperatorExpr na
     }
     return it->second;
 }
+
+const std::map<OperatorExpr, std::unique_ptr<Operation>>& Calculator::GetOperatorsMap() const{
+    return registry;
+}

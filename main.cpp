@@ -4,7 +4,6 @@
 #include<string>
 #include "calc.h"
 #include "ExpressionParser.h"
-#include "tokenizer.h"
 
 
 
@@ -20,33 +19,27 @@ int main() {
     std::string s;
     std::getline(std::cin, s);
 
-    // преобразуем выражение в вектор токенов, потом преобразуем их в обратную польскую нотацию
-    Tokenizer tok(s);
-    ExpressionParser expression(tok.ToExprTokens());
+    ExpressionParser expression(calc);
+    expression.Parse(s);
     expression.ToPostfix();
 
-    //получаем вектор где токены уже в правильном порядке и уже считаем результат
     auto tokens = expression.getTokens();
-    std::stack<std::unique_ptr<Expr>> resultStack;
+
+    std::stack<float> resultStack;
     for (auto& token: tokens){
         if (token->IsNumber()){
-            resultStack.push(std::move(token));
+            resultStack.push(token->AsNumber());
         } else {
             float result;
-            auto* op = dynamic_cast<OperatorExpr*>(token.get());
-            OperationType opType = op->getType();
-            auto right_ptr = std::move(resultStack.top()); 
+            OperationType opType  = token->AsOperation();
+            auto right = resultStack.top(); 
             resultStack.pop();
-            auto left_ptr = std::move(resultStack.top());  
+            auto left = resultStack.top();  
             resultStack.pop();
-            auto* right = dynamic_cast<NumberExpr*>(right_ptr.get());
-            auto* left  = dynamic_cast<NumberExpr*>(left_ptr.get());
-            result = calc.GetOperationByName(opType)->change_value(left->getNumber(), right->getNumber());
-            resultStack.push(std::make_unique<NumberExpr>(result));
+            result = calc.GetOperationByName(opType)->change_value(left, right);
+            resultStack.push(result);
         }
     }
-    
-    auto* result = dynamic_cast<NumberExpr*>(resultStack.top().get());
-    std::cout << result->getNumber();
+    std::cout << resultStack.top();
     return 0;
 }
