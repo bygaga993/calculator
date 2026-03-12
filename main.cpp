@@ -4,15 +4,16 @@
 #include<string>
 #include "calc.h"
 #include "ExpressionParser.h"
+#include "Operations.h"
 
 
 
 int main() {
     Calculator calc;
-    calc.RegisterOperation<AddOperation>(Plus).
-        RegisterOperation<SubOperation>(Minus).
-        RegisterOperation<DivOperation>(Div).
-        RegisterOperation<MulOperation>(Mul);
+    calc.RegisterOperation<AddOperation>("+").
+        RegisterOperation<SubOperation>("-").
+        RegisterOperation<DivOperation>("/").
+        RegisterOperation<MulOperation>("*");
 
 
     std::cout << "Введите выражение \n";
@@ -27,15 +28,15 @@ int main() {
 
     std::stack<float> resultStack;
     for (auto& token: tokens){
-        if (token->IsNumber()){
-            resultStack.push(token->AsNumber());
+        if (token->isNumber()){
+            resultStack.push(token->return_value());
         } else {
             float result;
             auto right = resultStack.top(); 
             resultStack.pop();
             auto left = resultStack.top();  
             resultStack.pop();
-            result = token->change_value(left, right);
+            result = token->return_value(left, right);
             resultStack.push(result);
         }
     }

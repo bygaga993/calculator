@@ -5,9 +5,10 @@
 #include <stdexcept>
 #include <iostream>
 #include "ExpressionParser.h"
+#include "Operations.h"
 
 
-bool ExpressionParser::ContainsOperation(OperationType type) const{
+bool ExpressionParser::ContainsOperation(std::string type) const{
     auto it = operators_.find(type);
     if (it != operators_.end()){
         return true;
@@ -35,30 +36,30 @@ void ExpressionParser::Parse(std::string expression){
             }
 
             float value = std::stof(number);
-            tokens.push_back(std::make_unique<NumberExpr>(value));
+            tokens.push_back(std::make_unique<Number>(value));
         }
-        else if (expression[i] == '+' && ContainsOperation(Plus)) {
-            tokens.push_back(std::make_unique<OperatorExpr>(Plus));
+        else if (expression[i] == '+' && ContainsOperation("+")) {
+            tokens.push_back(std::make_unique<AddOperation>());
             i++;
         }
-        else if (expression[i] == '-' && ContainsOperation(Minus)) {
-            tokens.push_back(std::make_unique<OperatorExpr>(Minus));
+        else if (expression[i] == '-' && ContainsOperation("-")) {
+            tokens.push_back(std::make_unique<SubOperation>());
             i++;
         }
-        else if (expression[i] == '*' && ContainsOperation(Mul)) {
-            tokens.push_back(std::make_unique<OperatorExpr>(Mul));
+        else if (expression[i] == '*' && ContainsOperation("*")) {
+            tokens.push_back(std::make_unique<MulOperation>());
             i++;
         }
-        else if (expression[i] == '/' && ContainsOperation(Div)) {
-            tokens.push_back(std::make_unique<OperatorExpr>(Div));
+        else if (expression[i] == '/' && ContainsOperation("/")) {
+            tokens.push_back(std::make_unique<DivOperation>());
             i++;
         }
         else if (expression[i] == '(') {
-            tokens.push_back(std::make_unique<OperatorExpr>(LParen));
+            tokens.push_back(std::make_unique<Parentheses>(LParen));
             i++;
         }
         else if (expression[i] == ')') {
-            tokens.push_back(std::make_unique<OperatorExpr>(RParen));
+            tokens.push_back(std::make_unique<Parentheses>(RParen));
             i++;
         }
         else if (expression[i] == '=') {
@@ -72,71 +73,57 @@ void ExpressionParser::Parse(std::string expression){
 
 void ExpressionParser::ToPostfix()
 {
-    std::vector<std::unique_ptr<Expr>> postfixExpr;
-    std::stack<std::unique_ptr<Expr>> opStack;
-
-    auto getPrecedence = [](OperatorExpr* op) -> int {
-        switch (op->getType()) {
-            case Mul: case Div: return 2;
-            case Plus: case Minus: return 1;
-            case LParen: case RParen: return 0;
-            default: return -1;
-        }
-    };
+    std::vector<std::unique_ptr<Expression>> postfixExpr;
+    std::stack<std::unique_ptr<Expression>> opStack;
 
     for (auto& token : tokens)
     {
-        if (token->IsNumber())
+        if (token->isNumber())
         {
             postfixExpr.push_back(std::move(token));
-        } 
-        else 
+            continue;
+        }
+
+        int priority = token->getPriority();
+
+        if (priority == 0)
         {
-            auto* op = dynamic_cast<OperatorExpr*>(token.get());
-            OperationType opType = op->getType();
+            auto* paren = dynamic_cast<Parentheses*>(token.get());
             
-            if (opType == LParen)
+            if (paren->getParenthesesType() == LParen)
             {
                 opStack.push(std::move(token));
-            } 
-            else if (opType == RParen) 
+            }
+            else 
             {
-                while (!opStack.empty()) 
+                while (!opStack.empty())
                 {
-                    auto* opTop = dynamic_cast<OperatorExpr*>(opStack.top().get());
-                    
-                    if (opTop->getType() == LParen)
-                    {
-                        opStack.pop();
+                    auto topToken = std::move(opStack.top());
+                    opStack.pop();
+
+                    if (topToken->getPriority() == 0) 
                         break;
-                    }
-                    
+
+                    postfixExpr.push_back(std::move(topToken));
+                }
+            }
+        }
+        else
+        {
+            while (!opStack.empty() && opStack.top()->getPriority() > 0)
+            {
+                if (opStack.top()->getPriority() >= priority)
+                {
                     postfixExpr.push_back(std::move(opStack.top()));
                     opStack.pop();
                 }
-            } 
-            else 
-            {
-                while (!opStack.empty()) 
+                else
                 {
-                    auto* opTop = dynamic_cast<OperatorExpr*>(opStack.top().get());
-                    
-                    if (opTop->getType() == LParen) {
-                        break;
-                    }
-                    
-                    if (getPrecedence(opTop) >= getPrecedence(op))
-                    {
-                        postfixExpr.push_back(std::move(opStack.top()));
-                        opStack.pop();
-                    } 
-                    else 
-                    {
-                        break;
-                    }
+                    break;
                 }
-                opStack.push(std::move(token));
             }
+            
+            opStack.push(std::move(token));
         }
     }
 
@@ -149,15 +136,8 @@ void ExpressionParser::ToPostfix()
     tokens = std::move(postfixExpr);
 }
 
-void ExpressionParser::Print() const{
-    for (auto& token : tokens) {
-        token->Print();
-        std::cout << " ";
-    }
-    std::cout <<'\n';
-}
 
 
-std::vector<std::unique_ptr<Expr>> ExpressionParser::getTokens() {
+std::vector<std::unique_ptr<Expression>> ExpressionParser::getTokens(){
     return std::move(tokens);  
 }

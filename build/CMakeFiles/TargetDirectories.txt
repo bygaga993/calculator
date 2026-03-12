@@ -1,0 +1,3 @@
+/Users/kseniamaksimenko/cpp_study/calculator2/build/CMakeFiles/calculator.dir
+/Users/kseniamaksimenko/cpp_study/calculator2/build/CMakeFiles/edit_cache.dir
+/Users/kseniamaksimenko/cpp_study/calculator2/build/CMakeFiles/rebuild_cache.dir
