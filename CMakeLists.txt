@@ -9,6 +9,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Название исполняемого файла
 set(TARGET_NAME calculator)
 
+option(BUILD_TESTS "Build tests only" OFF)
+
 # Исходные файлы
 set(SOURCES
     calc.cpp
@@ -41,4 +43,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(${TARGET_NAME} PRIVATE -fsanitize=address -fsanitize=undefined)
     target_link_options(${TARGET_NAME} PRIVATE -fsanitize=address -fsanitize=undefined)
+endif()
+
+# подключаем тесты
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(third_party/gtest)
+    add_subdirectory(tests)
 endif()

@@ -1,5 +1,7 @@
 #include "calc.h"
-#include<cmath>
+
+#include <stdexcept>
+#include <cmath>
 
 
 const std::unique_ptr<Operation>& Calculator::GetOperationByName(std::string name) const{
