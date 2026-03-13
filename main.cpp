@@ -1,7 +1,9 @@
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 #include <memory>
-#include<string>
+#include <stack>
+#include <string>
+
 #include "calc.h"
 #include "ExpressionParser.h"
 #include "Operations.h"

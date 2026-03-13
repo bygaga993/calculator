@@ -1,5 +1,7 @@
 #include "Operations.h"
-#include<memory>
+
+#include <memory>
+#include <stdexcept>
 
 
 int Expression::getPriority() const {
