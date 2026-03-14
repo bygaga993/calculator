@@ -17,7 +17,6 @@ int main()
 
     ExpressionParser expression(calc);
     expression.Parse(s);
-    expression.ToPostfix();
 
     auto NumTokens = expression.getNumTokens();
     auto OpTokens = expression.getOpTokens();

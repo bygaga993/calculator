@@ -17,73 +17,6 @@ bool ExpressionParser::ContainsOperation(std::string type) const
     return false;
 }
 
-void ExpressionParser::Parse(std::string expression)
-{
-
-    for (size_t i = 0; i < expression.size();)
-    {
-
-        if (std::isspace(expression[i]))
-        {
-            i++;
-            continue;
-        }
-
-        if (std::isdigit(expression[i]) || expression[i] == '.')
-        {
-            std::string number;
-
-            while (i < expression.size() &&
-                   (std::isdigit(expression[i]) || expression[i] == '.'))
-            {
-                number += expression[i];
-                i++;
-            }
-
-            float value = std::stof(number);
-            tokens.push_back(std::make_unique<Number>(value));
-        }
-        else if (expression[i] == '+' && ContainsOperation("+"))
-        {
-            tokens.push_back(std::make_unique<AddOperation>());
-            i++;
-        }
-        else if (expression[i] == '-' && ContainsOperation("-"))
-        {
-            tokens.push_back(std::make_unique<SubOperation>());
-            i++;
-        }
-        else if (expression[i] == '*' && ContainsOperation("*"))
-        {
-            tokens.push_back(std::make_unique<MulOperation>());
-            i++;
-        }
-        else if (expression[i] == '/' && ContainsOperation("/"))
-        {
-            tokens.push_back(std::make_unique<DivOperation>());
-            i++;
-        }
-        else if (expression[i] == '(')
-        {
-            tokens.push_back(std::make_unique<Parentheses>(LParen));
-            i++;
-        }
-        else if (expression[i] == ')')
-        {
-            tokens.push_back(std::make_unique<Parentheses>(RParen));
-            i++;
-        }
-        else if (expression[i] == '=')
-        {
-            break;
-        }
-        else
-        {
-            throw std::runtime_error("Unknown character");
-        }
-    }
-}
-
 void ExpressionParser::ToPostfix()
 {
     std::vector<std::unique_ptr<Operation>> postfixExpr;
@@ -155,12 +88,80 @@ void ExpressionParser::ToPostfix()
     NumTokens = std::move(postfixNumbers);
 }
 
-std::vector<std::unique_ptr<Operation>> ExpressionParser::getOpTokens() const
+const std::vector<std::unique_ptr<Operation>> &ExpressionParser::getOpTokens() const
 {
-    return std::move(OpTokens);
+    return OpTokens;
 }
 
-std::vector<std::unique_ptr<Number>> ExpressionParser::getNumTokens() const
+const std::vector<std::unique_ptr<Number>> &ExpressionParser::getNumTokens() const
 {
-    return std::move(NumTokens);
+    return NumTokens;
+}
+
+void ExpressionParser::Parse(std::string expression)
+{
+
+    for (size_t i = 0; i < expression.size();)
+    {
+
+        if (std::isspace(expression[i]))
+        {
+            i++;
+            continue;
+        }
+
+        if (std::isdigit(expression[i]) || expression[i] == '.')
+        {
+            std::string number;
+
+            while (i < expression.size() &&
+                   (std::isdigit(expression[i]) || expression[i] == '.'))
+            {
+                number += expression[i];
+                i++;
+            }
+
+            float value = std::stof(number);
+            tokens.push_back(std::make_unique<Number>(value));
+        }
+        else if (expression[i] == '+' && ContainsOperation("+"))
+        {
+            tokens.push_back(std::make_unique<AddOperation>());
+            i++;
+        }
+        else if (expression[i] == '-' && ContainsOperation("-"))
+        {
+            tokens.push_back(std::make_unique<SubOperation>());
+            i++;
+        }
+        else if (expression[i] == '*' && ContainsOperation("*"))
+        {
+            tokens.push_back(std::make_unique<MulOperation>());
+            i++;
+        }
+        else if (expression[i] == '/' && ContainsOperation("/"))
+        {
+            tokens.push_back(std::make_unique<DivOperation>());
+            i++;
+        }
+        else if (expression[i] == '(')
+        {
+            tokens.push_back(std::make_unique<Parentheses>(LParen));
+            i++;
+        }
+        else if (expression[i] == ')')
+        {
+            tokens.push_back(std::make_unique<Parentheses>(RParen));
+            i++;
+        }
+        else if (expression[i] == '=')
+        {
+            break;
+        }
+        else
+        {
+            throw std::runtime_error("Unknown character");
+        }
+    }
+    ToPostfix();
 }
