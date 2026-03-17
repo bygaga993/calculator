@@ -8,15 +8,10 @@
 #include "ExpressionParser.h"
 #include "Operations.h"
 
-
-
-int main() {
+int main()
+{
     Calculator calc;
-    calc.RegisterOperation<AddOperation>("+").
-        RegisterOperation<SubOperation>("-").
-        RegisterOperation<DivOperation>("/").
-        RegisterOperation<MulOperation>("*");
-
+    calc.RegisterOperation<AddOperation>("+").RegisterOperation<SubOperation>("-").RegisterOperation<DivOperation>("/").RegisterOperation<MulOperation>("*");
 
     std::cout << "Введите выражение \n";
     std::string s;
@@ -24,24 +19,40 @@ int main() {
 
     ExpressionParser expression(calc);
     expression.Parse(s);
-    expression.ToPostfix();
 
-    auto tokens = expression.getTokens();
+    auto NumTokens = expression.getNumTokens();
+    auto OpTokens = expression.getOpTokens();
 
     std::stack<float> resultStack;
-    for (auto& token: tokens){
-        if (token->isNumber()){
-            resultStack.push(token->return_value());
-        } else {
-            float result;
-            auto right = resultStack.top(); 
+    size_t numberIndex = 0;
+    size_t opIndex = 0;
+
+    while (numberIndex < NumTokens.size() || opIndex < OpTokens.size())
+    {
+        if (numberIndex < NumTokens.size())
+        {
+            resultStack.push(NumTokens[numberIndex]->getValue());
+            numberIndex++;
+        }
+        else
+        {
+            if (resultStack.size() < 2)
+            {
+                std::cout << "in result stack error";
+                break;
+            }
+
+            float right = resultStack.top();
             resultStack.pop();
-            auto left = resultStack.top();  
+            float left = resultStack.top();
             resultStack.pop();
-            result = token->return_value(left, right);
+
+            float result = OpTokens[opIndex]->return_value(left, right);
             resultStack.push(result);
+            opIndex++;
         }
     }
+
     std::cout << resultStack.top();
     return 0;
 }
