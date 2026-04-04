@@ -1,10 +1,13 @@
 set(TEST_TARGET calculator_tests)
 
 add_executable(${TEST_TARGET}
-    test_streq.cpp
+    tests_operation.cpp
+    tests_parser.cpp
+    tests_calculate.cpp
     ../Operations.cpp
     ../ExpressionParser.cpp
     ../calc.cpp
+    ../main_func.cpp
 )
 
 target_link_libraries(calculator_tests

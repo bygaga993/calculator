@@ -4,12 +4,6 @@
 #include "../ExpressionParser.h"
 #include "../calc.h"
 
-TEST(HelloTest, BasicAssertions)
-{
-  EXPECT_STRNE("hello", "world");
-  EXPECT_EQ(7 * 6, 42);
-}
-
 TEST(ExpressionTest, AddTest)
 {
   AddOperation add;
@@ -32,30 +26,25 @@ TEST(ExpressionTest, SubTest)
   EXPECT_FALSE(sub.isNumber());
 }
 
-class ParserTest : public testing::Test
+TEST(ExpressionTest, MulTest)
 {
-public:
-  ExpressionParser *parser;
-  Calculator *calc;
-  void SetUp()
-  {
-    calc = new Calculator();
-    calc->RegisterOperation<AddOperation>("+");
-    parser = new ExpressionParser(*calc);
-  }
-  void TearDown()
-  {
-    delete parser;
-    delete calc;
-  }
-};
-
-TEST_F(ParserTest, parse)
-{
-  parser->Parse("(1 + 2)");
-
-  const auto &numbers = parser->getNumTokens().size();
-  const auto &operations = parser->getOpTokens().size();
-  EXPECT_EQ(numbers, 2);
-  EXPECT_EQ(operations, 1);
+  MulOperation mul;
+  EXPECT_EQ(mul.return_value(5, 2), 10);
+  EXPECT_EQ(mul.return_value(-5, 2), -10);
+  EXPECT_EQ(mul.return_value(-7, -3), 21);
+  EXPECT_EQ(mul.return_value(2, 0), 0);
+  EXPECT_EQ(mul.getPriority(), 2);
+  EXPECT_FALSE(mul.isNumber());
 }
+
+TEST(ExpressionTest, DivTest)
+{
+  DivOperation div;
+  EXPECT_EQ(div.return_value(5, 2), 2.5);
+  EXPECT_EQ(div.return_value(-5, 2), -2.5);
+  EXPECT_EQ(div.return_value(-3, -3), 1);
+  EXPECT_THROW(div.return_value(2, 0), std::exception);
+  EXPECT_EQ(div.getPriority(), 2);
+  EXPECT_FALSE(div.isNumber());
+}
+

@@ -17,151 +17,330 @@ bool ExpressionParser::ContainsOperation(std::string type) const
     return false;
 }
 
-void ExpressionParser::ToPostfix()
-{
-    std::vector<std::unique_ptr<Operation>> postfixExpr;
-    std::vector<std::unique_ptr<Number>> postfixNumbers;
-    std::stack<std::unique_ptr<Expression>> opStack;
 
-    for (auto &token : tokens)
-    {
-        if (token->isNumber())
-        {
-            auto numberPtr = std::unique_ptr<Number>(dynamic_cast<Number *>(token.release()));
-            postfixNumbers.push_back(std::move(numberPtr));
+bool isCorrectArithmeticExpression(const std::string& s) {
+    int balance = 0;            
+    bool expectOperand = true;   
+
+    for (size_t i = 0; i < s.size();) {
+        if (std::isspace(static_cast<unsigned char>(s[i]))) {
+            ++i;
             continue;
         }
 
-        int priority = token->getPriority();
-
-        if (priority == 0)
-        {
-            auto *paren = dynamic_cast<Parentheses *>(token.get());
-
-            if (paren->getParenthesesType() == LParen)
-            {
-                opStack.push(std::move(token));
-            }
-            else
-            {
-                while (!opStack.empty())
-                {
-                    auto topToken = std::move(opStack.top());
-                    opStack.pop();
-
-                    if (topToken->getPriority() == 0)
-                        break;
-
-                    auto OpPtr = std::unique_ptr<Operation>(dynamic_cast<Operation *>(topToken.release()));
-                    postfixExpr.push_back(std::move(OpPtr));
-                }
-            }
-        }
-        else
-        {
-            while (!opStack.empty() && opStack.top()->getPriority() > 0)
-            {
-                if (opStack.top()->getPriority() >= priority)
-                {
-                    auto OpPtr = std::unique_ptr<Operation>(dynamic_cast<Operation *>(opStack.top().release()));
-                    postfixExpr.push_back(std::move(OpPtr));
-                    opStack.pop();
-                }
-                else
-                {
-                    break;
-                }
+        if (expectOperand) {
+            if (s[i] == '+' || s[i] == '-') {
+                ++i;
+                continue;
             }
 
-            opStack.push(std::move(token));
+            if (s[i] == '(') {
+                ++balance;
+                ++i;
+                continue;
+            }
+
+            if (std::isdigit(static_cast<unsigned char>(s[i]))) {
+                while (i < s.size() && std::isdigit(static_cast<unsigned char>(s[i]))) {
+                    ++i;
+                }
+                expectOperand = false;
+                continue;
+            }
+
+            return false;
+        } else {
+            if (s[i] == '+' || s[i] == '-' || s[i] == '*' || s[i] == '/') {
+                expectOperand = true;
+                ++i;
+                continue;
+            }
+
+            if (s[i] == ')') {
+                if (balance == 0) return false;
+                --balance;
+                ++i;
+                continue;
+            }
+
+            return false;
         }
     }
 
+    return !expectOperand && balance == 0;
+}
+
+
+void ExpressionParser::ToPostfix()
+{
+
+    std::vector<std::shared_ptr<Operation>> postfixExpr;
+    std::vector<std::shared_ptr<Number>> postfixNumbers;
+    std::vector<std::shared_ptr<Expression>> postfixTokens;
+
+
+    std::stack<std::shared_ptr<Expression>> opStack;
+
+   for (auto &token : tokens){
+        token->process(postfixExpr, postfixNumbers, postfixTokens, opStack);
+   }
+
     while (!opStack.empty())
     {
-        auto OpPtr = std::unique_ptr<Operation>(dynamic_cast<Operation *>(opStack.top().release()));
-        postfixExpr.push_back(std::move(OpPtr));
+        opStack.top()->appendToPostfix(postfixExpr, postfixNumbers, postfixTokens);
         opStack.pop();
     }
 
     OpTokens = std::move(postfixExpr);
     NumTokens = std::move(postfixNumbers);
+    OrderTokens = std::move(postfixTokens);
 }
 
-std::vector<std::unique_ptr<Operation>> ExpressionParser::getOpTokens()
+std::vector<std::shared_ptr<Operation>> ExpressionParser::getOpTokens()
 {
     return std::move(OpTokens);
 }
 
-std::vector<std::unique_ptr<Number>> ExpressionParser::getNumTokens()
+std::vector<std::shared_ptr<Number>> ExpressionParser::getNumTokens()
 {
     return std::move(NumTokens);
 }
 
-void ExpressionParser::Parse(std::string expression)
+std::vector<std::shared_ptr<Expression>> ExpressionParser::getOrderTokens()
 {
+    return OrderTokens;
+}
 
-    for (size_t i = 0; i < expression.size();)
+
+
+void ExpressionParser::SkipSpaces(const std::string& expression, size_t& i)
+{
+    while (i < expression.size() &&
+           std::isspace(static_cast<unsigned char>(expression[i])))
     {
+        ++i;
+    }
+}
 
-        if (std::isspace(expression[i]))
-        {
-            i++;
-            continue;
-        }
+float ExpressionParser::ParseNumber(const std::string& expression, size_t& i, bool negative)
+{
+    std::string number;
+    int dotCount = 0;
 
-        if (std::isdigit(expression[i]) || expression[i] == '.')
-        {
-            std::string number;
+    if (negative)
+        number += '-';
 
-            while (i < expression.size() &&
-                   (std::isdigit(expression[i]) || expression[i] == '.'))
-            {
-                number += expression[i];
-                i++;
-            }
+    while (i < expression.size())
+    {
+        unsigned char ch = static_cast<unsigned char>(expression[i]);
 
-            float value = std::stof(number);
-            tokens.push_back(std::make_unique<Number>(value));
-        }
-        else if (expression[i] == '+' && ContainsOperation("+"))
+        if (std::isdigit(ch))
         {
-            tokens.push_back(std::make_unique<AddOperation>());
-            i++;
+            number += expression[i];
+            ++i;
         }
-        else if (expression[i] == '-' && ContainsOperation("-"))
+        else if (expression[i] == '.')
         {
-            tokens.push_back(std::make_unique<SubOperation>());
-            i++;
-        }
-        else if (expression[i] == '*' && ContainsOperation("*"))
-        {
-            tokens.push_back(std::make_unique<MulOperation>());
-            i++;
-        }
-        else if (expression[i] == '/' && ContainsOperation("/"))
-        {
-            tokens.push_back(std::make_unique<DivOperation>());
-            i++;
-        }
-        else if (expression[i] == '(')
-        {
-            tokens.push_back(std::make_unique<Parentheses>(LParen));
-            i++;
-        }
-        else if (expression[i] == ')')
-        {
-            tokens.push_back(std::make_unique<Parentheses>(RParen));
-            i++;
-        }
-        else if (expression[i] == '=')
-        {
-            break;
+            ++dotCount;
+            if (dotCount > 1)
+                throw std::runtime_error("Invalid number format");
+
+            number += expression[i];
+            ++i;
         }
         else
         {
-            throw std::runtime_error("Unknown character");
+            break;
         }
     }
+
+    if (number.empty() || number == "." || number == "-" || number == "-.")
+        throw std::runtime_error("Invalid number format");
+
+    return std::stof(number);
+}
+
+
+
+void ExpressionParser::Parse(std::string expression)
+{
+    tokens.clear();
+    NumTokens.clear();
+    OpTokens.clear();
+    OrderTokens.clear();
+
+    bool expectOperand = true;
+    int parenBalance = 0;
+
+    for (size_t i = 0; i < expression.size();)
+    {
+        SkipSpaces(expression, i);
+
+        if (i >= expression.size())
+            break;
+
+        unsigned char ch = static_cast<unsigned char>(expression[i]);
+
+        if (std::isdigit(ch) || expression[i] == '.')
+        {
+            if (!expectOperand)
+                throw std::runtime_error("Expected operator before number");
+
+            float value = ParseNumber(expression, i, false);
+            tokens.push_back(std::make_shared<Number>(value));
+            expectOperand = false;
+            continue;
+        }
+
+        if (expression[i] == '(')
+        {
+            if (!expectOperand)
+                throw std::runtime_error("Expected operator before '('");
+
+            tokens.push_back(std::make_shared<Parentheses>(LParen));
+            ++parenBalance;
+            ++i;
+            expectOperand = true;
+            continue;
+        }
+
+        if (expression[i] == ')')
+        {
+            if (expectOperand)
+                throw std::runtime_error("Unexpected ')'");
+
+            if (parenBalance == 0)
+                throw std::runtime_error("Unmatched ')'");
+
+            tokens.push_back(std::make_shared<Parentheses>(RParen));
+            --parenBalance;
+            ++i;
+            expectOperand = false;
+            continue;
+        }
+
+        if (expression[i] == '+')
+        {
+            if (expectOperand)
+            {
+                size_t j = i + 1;
+                SkipSpaces(expression, j);
+
+                if (j >= expression.size())
+                    throw std::runtime_error("Invalid use of unary '+'");
+
+                if (std::isdigit(static_cast<unsigned char>(expression[j])) || expression[j] == '.')
+                {
+                    i = j;
+                    float value = ParseNumber(expression, i, false);
+                    tokens.push_back(std::make_shared<Number>(value));
+                    expectOperand = false;
+                    continue;
+                }
+
+                if (expression[j] == '(')
+                {
+                    if (!ContainsOperation("*"))
+                        throw std::runtime_error("Operation '*' is not supported");
+                    ++i; 
+                    expectOperand = true;
+                    continue;
+                }
+
+                throw std::runtime_error("Invalid use of unary '+'");
+            }
+
+            if (!ContainsOperation("+"))
+                throw std::runtime_error("Operation '+' is not supported");
+
+            tokens.push_back(std::make_shared<AddOperation>());
+            ++i;
+            expectOperand = true;
+            continue;
+        }
+
+        if (expression[i] == '-')
+        {
+            if (expectOperand)
+            {
+                size_t j = i + 1;
+                SkipSpaces(expression, j);
+
+                if (j >= expression.size())
+                    throw std::runtime_error("Invalid use of unary '-'");
+
+                if (std::isdigit(static_cast<unsigned char>(expression[j])) || expression[j] == '.')
+                {
+                    i = j;
+                    float value = ParseNumber(expression, i, true);
+                    tokens.push_back(std::make_shared<Number>(value));
+                    expectOperand = false;
+                    continue;
+                }
+
+                if (expression[j] == '(')
+                {
+                    if (!ContainsOperation("*"))
+                        throw std::runtime_error("Operation '*' is not supported");
+
+                    tokens.push_back(std::make_shared<Number>(-1.0f));
+                    tokens.push_back(std::make_shared<MulOperation>());
+                    ++i; 
+                    expectOperand = true;
+                    continue;
+                }
+
+                throw std::runtime_error("Invalid use of unary '-'");
+            }
+
+            if (!ContainsOperation("-"))
+                throw std::runtime_error("Operation '-' is not supported");
+
+            tokens.push_back(std::make_shared<SubOperation>());
+            ++i;
+            expectOperand = true;
+            continue;
+        }
+
+        if (expression[i] == '*')
+        {
+            if (expectOperand)
+                throw std::runtime_error("Unexpected '*'");
+
+            if (!ContainsOperation("*"))
+                throw std::runtime_error("Operation '*' is not supported");
+
+            tokens.push_back(std::make_shared<MulOperation>());
+            ++i;
+            expectOperand = true;
+            continue;
+        }
+
+        if (expression[i] == '/')
+        {
+            if (expectOperand)
+                throw std::runtime_error("Unexpected '/'");
+
+            if (!ContainsOperation("/"))
+                throw std::runtime_error("Operation '/' is not supported");
+
+            tokens.push_back(std::make_shared<DivOperation>());
+            ++i;
+            expectOperand = true;
+            continue;
+        }
+
+        if (expression[i] == '=')
+            break;
+
+        throw std::runtime_error("Unknown character");
+    }
+
+    if (parenBalance != 0)
+        throw std::runtime_error("Unmatched '('");
+
+    if (expectOperand)
+        throw std::runtime_error("Expression ends unexpectedly");
+
     ToPostfix();
 }
