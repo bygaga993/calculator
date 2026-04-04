@@ -13,17 +13,19 @@ option(BUILD_TESTS "Build tests only" OFF)
 
 # Исходные файлы
 set(SOURCES
-    calc.cpp
-    ExpressionParser.cpp
+    src/calc.cpp
+    src/ExpressionParser.cpp
     main.cpp
-    Operations.cpp
+    src/Operations.cpp
+    src/main_func.cpp
 )
 
 # Заголовочные файлы
 set(HEADERS
-    calc.h
-    ExpressionParser.h
-    Operations.h
+    include/calc.h
+    include/main_func.h
+    include/ExpressionParser.h
+    include/Operations.h
 )
 
 # Создание исполняемого файла

@@ -1,5 +1,5 @@
-#include "Operations.h"
-#include "ExpressionParser.h"
+#include "../include/Operations.h"
+#include "../include/ExpressionParser.h"
 
 #include <memory>
 #include <stack>

@@ -4,10 +4,10 @@ add_executable(${TEST_TARGET}
     tests_operation.cpp
     tests_parser.cpp
     tests_calculate.cpp
-    ../Operations.cpp
-    ../ExpressionParser.cpp
-    ../calc.cpp
-    ../main_func.cpp
+    ../src/Operations.cpp
+    ../src/ExpressionParser.cpp
+    ../src/calc.cpp
+    ../src/main_func.cpp
 )
 
 target_link_libraries(calculator_tests

@@ -4,8 +4,8 @@
 #include <memory>
 #include <stdexcept>
 #include <iostream>
-#include "ExpressionParser.h"
-#include "Operations.h"
+#include "../include/ExpressionParser.h"
+#include "../include/Operations.h"
 
 bool ExpressionParser::ContainsOperation(std::string type) const
 {

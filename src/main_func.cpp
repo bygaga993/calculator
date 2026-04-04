@@ -1,7 +1,8 @@
-#include "main_func.h"
+#include "../include/main_func.h"
+#include "../include/Operations.h"
 
-float getResult(std::vector<std::shared_ptr<Operation>> OpTokens, std::vector<std::shared_ptr<Number>> NumTokens, 
-    std::vector<std::shared_ptr<Expression>> OrderTokens){
+float getResult(std::vector<std::shared_ptr<Operation>>& OpTokens, std::vector<std::shared_ptr<Number>>& NumTokens, 
+    std::vector<std::shared_ptr<Expression>>& OrderTokens){
         std::stack<float> resultStack;
 
     size_t numberIndex = 0;

@@ -4,10 +4,10 @@
 #include <stack>
 #include <string>
 
-#include "calc.h"
-#include "ExpressionParser.h"
-#include "Operations.h"
-#include "main_func.h"
+#include "include/calc.h"
+#include "include/ExpressionParser.h"
+#include "include/Operations.h"
+#include "include/main_func.h"
 
 
 int main()
